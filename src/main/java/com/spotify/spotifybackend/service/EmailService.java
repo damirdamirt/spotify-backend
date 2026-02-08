@@ -27,4 +27,15 @@ public class EmailService {
                         "Thank you, Spotify clone team");
         javaMailSender.send(message);
     }
+
+    public void sendOtpEmail(String toEmail, String otpCode) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Spotify Clone - Your OTP code for login");
+        message.setText("Your one-time login code is: " + otpCode +
+                "\n\nThis code is valid for 5 minutes.\nDo not reveal this code to anyone!");
+
+        javaMailSender.send(message);
+        System.out.println("OTP Email send to: " + toEmail);
+    }
 }

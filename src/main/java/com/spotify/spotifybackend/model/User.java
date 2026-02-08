@@ -37,7 +37,14 @@ public class User implements UserDetails {
     @Column(name = "last_password_reset_date")
     private LocalDateTime lastPasswordResetDate;
 
-    private boolean enabled = false;
+    @Column(name = "otp_code")
+    private String otpCode;
+
+    @Column(name = "otp_expiration_time")
+    private LocalDateTime otpExpirationTime;
+
+    @Column(name = "lockout_end_time")
+    private LocalDateTime lockOutEndTime;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_authority",
@@ -45,6 +52,34 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id")
     )
     private Set<Authority> authorities = new HashSet<>();
+
+    private boolean enabled = false;
+
+    public String getOtpCode() {
+        return otpCode;
+    }
+
+    public void setOtpCode(String otpCode) {
+        this.otpCode = otpCode;
+    }
+
+    public LocalDateTime getOtpExpirationTime() {
+        return otpExpirationTime;
+    }
+
+    public void setOtpExpirationTime(LocalDateTime otpExpirationTime) {
+        this.otpExpirationTime = otpExpirationTime;
+    }
+
+    public LocalDateTime getLockOutEndTime() {
+        return lockOutEndTime;
+    }
+
+    public void setLockOutEndTime(LocalDateTime lockOutEndTime) {
+        this.lockOutEndTime = lockOutEndTime;
+    }
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
