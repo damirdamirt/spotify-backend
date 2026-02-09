@@ -7,4 +7,8 @@ public interface AuthService {
     void verifyUser(String token);
     void login(LoginRequestDto loginRequest);
     AuthResponseDto verifyOtp(VerifyOtpDto input);
+    void sendMagicLoginLink(MagicLinkRequestDto input);
+    AuthResponseDto loginWithMagicLink(MagicLinkLoginDto input);
+    void initiatePasswordChange(InitiatePasswordChangeDto input);
+    void finalizePasswordChange(FinishPasswordChangeDto input);
 }

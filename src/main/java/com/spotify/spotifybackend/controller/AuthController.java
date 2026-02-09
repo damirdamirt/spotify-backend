@@ -41,4 +41,27 @@ public class AuthController {
         AuthResponseDto response = authService.verifyOtp(verifyOtpDto);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/magic-link/request")
+    public ResponseEntity<String> requestMagicLink(@RequestBody MagicLinkRequestDto dto) {
+        authService.sendMagicLoginLink(dto);
+        return ResponseEntity.ok("Magic link has sent on your email.");
+    }
+
+    @PostMapping("/magic-link/login")
+    public ResponseEntity<AuthResponseDto> loginMagicLink(@RequestBody MagicLinkLoginDto dto) {
+        return ResponseEntity.ok(authService.loginWithMagicLink(dto));
+    }
+
+    @PostMapping("/password-change/initiate")
+    public ResponseEntity<String> initiatePasswordChange(@RequestBody InitiatePasswordChangeDto dto) {
+        authService.initiatePasswordChange(dto);
+        return ResponseEntity.ok("Link with change password has sent on your email.");
+    }
+
+    @PostMapping("/password-change/finalize")
+    public ResponseEntity<String> finalizePasswordChange(@Valid @RequestBody FinishPasswordChangeDto dto) {
+        authService.finalizePasswordChange(dto);
+        return ResponseEntity.ok("Password changed successfully. You can login.");
+    }
 }

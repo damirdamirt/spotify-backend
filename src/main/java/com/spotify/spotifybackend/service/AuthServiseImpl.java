@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class AuthServiseImpl implements AuthService{
@@ -119,11 +120,21 @@ public class AuthServiseImpl implements AuthService{
             throw  new IllegalArgumentException("Wrong password");
         }
 
-        if(user.getLastPasswordResetDate() != null &&
+        if (user.getLastPasswordResetDate() != null &&
                 user.getLastPasswordResetDate().isBefore(LocalDateTime.now().minusDays(60))) {
+
+            user.setLockOutEndTime(LocalDateTime.now().plusMinutes(2));
+
+            String token = UUID.randomUUID().toString();
+            user.setResetPasswordToken(token);
+            user.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(15));
+            userRepository.save(user);
+
+            emailService.sendPasswordChangeLink(user.getEmail(), token);
+
             throw new IllegalArgumentException("Your password is expired (older then 60 days). " +
-                                               "Your account has been locked for 2 minutes. " +
-                                               "Please, after that reset the password");
+                    "Your account has been locked for 2 minutes. " +
+                    "The link for paswword change is sent to your email");
         }
 
         String otp = String.valueOf(new Random().nextInt(900000) + 100000);
@@ -160,5 +171,97 @@ public class AuthServiseImpl implements AuthService{
         return new AuthResponseDto(token);
     }
 
+    @Override
+    public void sendMagicLoginLink(MagicLinkRequestDto input) {
+        User user = userRepository.findByEmail(input.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User doesn't exist with that mail."));
 
+        if (user.getLockOutEndTime() != null && user.getLockOutEndTime().isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Account is locked due to 60 day expiration. " +
+                                                "please try again in 2 minutes");
+        }
+
+        String token = UUID.randomUUID().toString();
+        user.setResetPasswordToken(token);
+        user.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(10));
+        userRepository.save(user);
+
+        emailService.sendMagicLoginLink(user.getEmail(), token);
+    }
+
+    @Override
+    public AuthResponseDto loginWithMagicLink(MagicLinkLoginDto input) {
+        User user = userRepository.findByResetPasswordToken(input.getToken())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid token."));
+
+        if (user.getResetPasswordTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Link has expired.");
+        }
+
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiry(null);
+        user.setLockOutEndTime(null);
+        userRepository.save(user);
+
+        String jwtToken = jwtService.generateToken(user.getUsername());
+        return new AuthResponseDto(jwtToken);
+    }
+
+    @Override
+    public void initiatePasswordChange(InitiatePasswordChangeDto input) {
+        User user = userRepository.findByUsername(input.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("User with that username doesn't exist."));
+
+        boolean isLocked = user.getLockOutEndTime() != null && user.getLockOutEndTime().isAfter(LocalDateTime.now());
+
+        if (!isLocked && user.getLastPasswordResetDate() != null &&
+                user.getLastPasswordResetDate().isAfter(LocalDateTime.now().minusDays(1))) {
+            throw new IllegalArgumentException("You can change paswword only once in 24 hours.");
+        }
+
+        String token = UUID.randomUUID().toString();
+        user.setResetPasswordToken(token);
+        user.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(15));
+        userRepository.save(user);
+
+        emailService.sendPasswordChangeLink(user.getEmail(), token);
+    }
+
+    @Override
+    public void finalizePasswordChange(FinishPasswordChangeDto input) {
+
+        if (!input.getNewPassword().equals(input.getConfirmPassword())) {
+            throw new IllegalArgumentException("New passwords doesn't match.");
+        }
+
+
+        User user = userRepository.findByResetPasswordToken(input.getToken())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid token."));
+
+
+        if (user.getResetPasswordTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Link has expiried.");
+        }
+
+
+        if (!passwordEncoder.matches(input.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Old password isn't correct.");
+        }
+
+        if (user.getLockOutEndTime() != null && user.getLockOutEndTime().isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Account is temporary locked due to expired password. \n" +
+                                                                   "Wait for 2 minutes before next try.");
+        }
+
+        // 5. Sve OK -> Menjaj
+        user.setPassword(passwordEncoder.encode(input.getNewPassword()));
+        user.setLastPasswordResetDate(LocalDateTime.now());
+
+        // Ciscenje
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiry(null);
+        user.setLockOutEndTime(null);
+
+        userRepository.save(user);
+    }
 }

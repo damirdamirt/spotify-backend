@@ -38,4 +38,27 @@ public class EmailService {
         javaMailSender.send(message);
         System.out.println("OTP Email send to: " + toEmail);
     }
+
+    public void sendMagicLoginLink(String toEmail, String token) {
+        String link = "http://localhost:3000/magic-login?token=" + token;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Spotify Clone - Your magic link for login");
+        message.setText("Click on the link to login wothout password:\n" + link +
+                "\n\nToken: " + token); // Token for Postman
+        javaMailSender.send(message);
+    }
+
+    public void sendPasswordChangeLink(String toEmail, String token) {
+        // Link vodi na CHANGE PASSWORD formu (na frontendu)
+        String link = "http://localhost:3000/change-password-form?token=" + token;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Spotify Clone - Password change request");
+        message.setText("Password change requested. Click on the link to continue:\n" + link +
+                "\n\nToken: " + token); // Token for Postman
+        javaMailSender.send(message);
+    }
 }
