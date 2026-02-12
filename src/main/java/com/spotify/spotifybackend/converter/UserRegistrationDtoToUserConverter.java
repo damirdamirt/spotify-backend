@@ -20,6 +20,7 @@ public class UserRegistrationDtoToUserConverter implements Converter<UserRegistr
         user.setFirstName(source.getFirstName());
         user.setLastName(source.getLastName());
         user.setEmail(source.getEmail());
+        user.setAge(source.getAge());
         user.setPassword(source.getPassword());
         user.setEnabled(false);
 

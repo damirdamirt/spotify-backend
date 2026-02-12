@@ -2,6 +2,7 @@ package com.spotify.spotifybackend.globalExceptionHandler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,5 +36,21 @@ public class GlobalExceptionHandler {
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleJsonErrors(HttpMessageNotReadableException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+
+        // Proveravamo da li je greška nastala zbog polja 'age' ili nekog drugog Int/Long polja
+        if (ex.getMessage().contains("age") || ex.getMessage().contains("int")) {
+            errorResponse.put("error", "Field 'age' must be a number, not text.");
+        } else {
+            // Generalna poruka ako je nešto drugo loše formatirano u JSON-u
+            errorResponse.put("error", "You have submitted an incorrect data format. " +
+                        "Make sure you entered text where a number is expected.");
+        }
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }

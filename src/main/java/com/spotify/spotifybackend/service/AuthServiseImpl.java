@@ -68,9 +68,7 @@ public class AuthServiseImpl implements AuthService{
 
         Authority userRole = authorityRepository.findByName("ROLE_USER");
         if(userRole == null) {
-            userRole = new Authority();
-            userRole.setName("ROLE_USER");
-            authorityRepository.save(userRole);
+            throw new RuntimeException("Error: Role 'ROLE_USER' is not found in database.");
         }
 
         Set<Authority> authorities = new HashSet<>();

@@ -29,6 +29,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Gasimo CSRF za sada jer testiramo preko Postmana
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/error").permitAll() // Pustamo sve ka /api/auth (Login, Register)
+                        .requestMatchers("/api/files/**").hasRole("ADMIN")
                         .anyRequest().authenticated() // Sve ostalo mora biti logovan korisnik
                 )
                 .sessionManagement(sess ->
