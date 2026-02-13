@@ -48,7 +48,7 @@ public class AuthServiseImpl implements AuthService{
     }
 
     @Override
-    public UserDto register(UserRegistrationDto registrationDto) {
+    public void register(UserRegistrationDto registrationDto) {
         if(!registrationDto.getPassword().equals(registrationDto.getRepeatedPassword())) {
             throw new IllegalArgumentException("Passwords do not match");
         }
@@ -81,8 +81,6 @@ public class AuthServiseImpl implements AuthService{
         verificationTokenRepository.save(verificationToken);
 
         emailService.sendVerificationEmail(savedUser.getEmail(), verificationToken.getToken());
-
-        return toDtoConverter.convert(savedUser);
     }
 
     @Override
@@ -108,6 +106,10 @@ public class AuthServiseImpl implements AuthService{
     public void login(LoginRequestDto loginRequest) {
         User user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User with that username doesn't exist"));
+
+        if (!user.isEnabled()) {
+            throw new IllegalArgumentException("Your account is not activated. Please check your email and verify your account.");
+        }
 
         if(user.getLockOutEndTime() != null && user.getLockOutEndTime().isAfter(LocalDateTime.now())) {
             throw new IllegalArgumentException("Account is temporary locked due to expired password. " +

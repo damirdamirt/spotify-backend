@@ -18,10 +18,11 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@Valid @RequestBody UserRegistrationDto registrationDto) {
-        UserDto result = authService.register(registrationDto);
+    public ResponseEntity<String> register(@Valid @RequestBody UserRegistrationDto registrationDto) {
+        authService.register(registrationDto);
 
-        return new ResponseEntity<>(result, HttpStatus.CREATED);
+        return ResponseEntity.ok("Registration successful! " +
+                            "We have sent a verification link to your email: " + registrationDto.getEmail());
     }
 
     @GetMapping("/verify")
