@@ -19,7 +19,7 @@ public class EmailService {
         message.setTo(toEmail);
         message.setSubject("Spotify clone - registration confirm");
 
-        String link = "http://localhost:8080/api/auth/verify?token=" + token;
+        String link = "http://127.0.0.1:5500/verify.html?token=" + token;
 
         message.setText("Hello,\n\n" +
                         "Please, confirm your registration with click on link below:\n " +

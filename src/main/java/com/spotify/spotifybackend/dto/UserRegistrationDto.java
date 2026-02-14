@@ -26,7 +26,8 @@ public class UserRegistrationDto {
     private String lastName;
 
     @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            message = "Email format is invalid. Must contain '@' and domain (e.g. .com)")
     private String email;
 
     @NotNull(message = "Age is required")
