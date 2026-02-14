@@ -10,19 +10,19 @@ public class UserRegistrationDto {
     // 1. Whitelisting & Special Chars: Samo slova i brojevi, bez specijalnih znakova (<, >, ;)
     @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "Username must contain only letters and numbers")
     // 2. Boundary Checking: Dužina između 3 i 20
-    @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
+    @Size(min = 3, max = 15, message = "Username must be between 3 and 15 characters")
     private String username;
 
     @NotBlank(message = "Name is required")
     // 1. Whitelisting: Samo slova i razmaci (zabranjujemo <script> i SQL znakove)
-    @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "First name must contain only letters")
+    @Pattern(regexp = "^[a-zA-Z\\sčćđšžČĆĐŠŽ]+$", message = "First name must contain only letters")
     // 2. Boundary Checking
-    @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
+    @Size(min = 2, max = 20, message = "First name must be between 2 and 20 characters")
     private String firstName;
 
     @NotBlank(message = "Lastname is required")
-    @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "Last name must contain only letters")
-    @Size(min = 2, max = 50, message = "Last name must be between 2 and 50 characters")
+    @Pattern(regexp = "^[a-zA-Z\\sčćđšžČĆĐŠŽ]+$", message = "Last name must contain only letters")
+    @Size(min = 2, max = 20, message = "Last name must be between 2 and 20 characters")
     private String lastName;
 
     @NotBlank(message = "Email is required")
