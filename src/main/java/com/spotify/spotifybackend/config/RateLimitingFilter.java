@@ -19,38 +19,47 @@ public class RateLimitingFilter implements Filter {
 
     private final Map<String, CopyOnWriteArrayList<Long>> requestLogs = new ConcurrentHashMap<>();
 
-    private static final int MAX_REQUESTS = 5; // Dozvoljeno 5 zahteva
-    private static final long TIME_WINDOW = 10 * 1000; // ...u 10 sekundi
+    private static final int MAX_REQUESTS = 10; // Povecali smo na 10 da bude lakse za test
+    private static final long TIME_WINDOW = 10 * 1000; // 10 sekundi
 
     @Override
     public void doFilter(ServletRequest servletRequest,
                          ServletResponse servletResponse,
                          FilterChain filterChain) throws IOException, ServletException {
 
-            HttpServletRequest request = (HttpServletRequest) servletRequest;
-            HttpServletResponse response = (HttpServletResponse) servletResponse;
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-            String clientIp = request.getRemoteAddr();
-            long currentTime = System.currentTimeMillis();
-
-            // 1. Uzmi ili kreiraj log za ovu IP adresu
-            requestLogs.putIfAbsent(clientIp, new CopyOnWriteArrayList<>());
-            CopyOnWriteArrayList<Long> timestamps = requestLogs.get(clientIp);
-
-            // 2. Ocisti stare zahteve (koji su stariji od 10 sekundi)
-            timestamps.removeIf(timestamp -> currentTime - timestamp > TIME_WINDOW);
-
-            // 3. Proveri da li je prekoracen limit
-            if (timestamps.size() >= MAX_REQUESTS) {
-                response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value()); // Vraca 429
-                response.getWriter().write("Too many requests - Rate limit exceeded. Try again later.");
-                return; // Prekini lanac, ne daj mu da prodje dalje!
-            }
-
-            // 4. Zabelezi trenutni zahtev
-            timestamps.add(currentTime);
-
-            // 5. Pusti zahtev dalje
+        // 1. PROPUSTI "OPTIONS" ZAHTEVE (Preflight)
+        // Browseri salju ovo da provere CORS. To ne smemo da blokiramo.
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
+            return;
+        }
+
+        String clientIp = request.getRemoteAddr();
+        long currentTime = System.currentTimeMillis();
+
+        requestLogs.putIfAbsent(clientIp, new CopyOnWriteArrayList<>());
+        CopyOnWriteArrayList<Long> timestamps = requestLogs.get(clientIp);
+
+        // Ocisti stare zapise
+        timestamps.removeIf(timestamp -> currentTime - timestamp > TIME_WINDOW);
+
+        // Proveri limit
+        if (timestamps.size() >= MAX_REQUESTS) {
+            // Rucno dodajemo CORS headere za gresku
+            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+            response.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1:5500");
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+
+            response.getWriter().write("Too many requests - Rate limit exceeded.");
+            return;
+        }
+
+        timestamps.add(currentTime);
+        filterChain.doFilter(request, response);
     }
 }
