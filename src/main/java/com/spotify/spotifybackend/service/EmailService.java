@@ -40,12 +40,12 @@ public class EmailService {
     }
 
     public void sendMagicLoginLink(String toEmail, String token) {
-        String link = "http://localhost:3000/magic-login?token=" + token;
+        String link = "http://127.0.0.1:5500/magic-login.html?token=" + token;
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject("Spotify Clone - Your magic link for login");
-        message.setText("Click on the link to login wothout password:\n" + link +
+        message.setText("Click on the link to login without password:\n" + link +
                 "\n\nToken: " + token); // Token for Postman
         javaMailSender.send(message);
     }

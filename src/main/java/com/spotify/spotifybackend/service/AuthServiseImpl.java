@@ -168,7 +168,7 @@ public class AuthServiseImpl implements AuthService{
 
         String token = jwtService.generateToken(user.getUsername());
 
-        return new AuthResponseDto(token);
+        return new AuthResponseDto(token, user.getUsername());
     }
 
     @Override
@@ -204,7 +204,7 @@ public class AuthServiseImpl implements AuthService{
         userRepository.save(user);
 
         String jwtToken = jwtService.generateToken(user.getUsername());
-        return new AuthResponseDto(jwtToken);
+        return new AuthResponseDto(jwtToken, user.getUsername());
     }
 
     @Override
