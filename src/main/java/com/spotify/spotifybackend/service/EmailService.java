@@ -52,7 +52,7 @@ public class EmailService {
 
     public void sendPasswordChangeLink(String toEmail, String token) {
         // Link vodi na CHANGE PASSWORD formu (na frontendu)
-        String link = "http://localhost:3000/change-password-form?token=" + token;
+        String link = "http://127.0.0.1:5500/change-password.html?token=" + token;
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
