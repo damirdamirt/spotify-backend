@@ -78,7 +78,7 @@ public class FileService {
         return false;
     }
 
-    private String calculateSha256(MultipartFile file) throws IOException, NoSuchAlgorithmException {
+    public String calculateSha256(MultipartFile file) throws IOException, NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         try (InputStream is = file.getInputStream()) {
             byte[] buffer = new byte[8192];

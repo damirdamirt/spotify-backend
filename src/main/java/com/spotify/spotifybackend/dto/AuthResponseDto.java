@@ -1,13 +1,17 @@
 package com.spotify.spotifybackend.dto;
 
+import java.util.List;
+
 public class AuthResponseDto {
 
     private String accessToken;
     private String username;
+    private List<String> roles;
 
-    public AuthResponseDto(String accessToken, String username) {
+    public AuthResponseDto(String accessToken, String username, List<String> roles) {
         this.accessToken = accessToken;
         this.username = username;
+        this.roles = roles;
     }
 
     public String getAccessToken() {
@@ -20,6 +24,14 @@ public class AuthResponseDto {
 
     public String getUsername() {
         return username;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 
     public void setUsername(String username) {

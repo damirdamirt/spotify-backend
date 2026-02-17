@@ -13,10 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class AuthServiseImpl implements AuthService{
@@ -168,7 +165,12 @@ public class AuthServiseImpl implements AuthService{
 
         String token = jwtService.generateToken(user.getUsername());
 
-        return new AuthResponseDto(token, user.getUsername());
+        // --- NOVO: Izvlacenje svih rola u listu ---
+        List<String> roles = user.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .toList(); // Sakupljamo sve role (npr. ["ROLE_USER", "ROLE_ADMIN"])
+
+        return new AuthResponseDto(token, user.getUsername(), roles);
     }
 
     @Override
@@ -203,8 +205,13 @@ public class AuthServiseImpl implements AuthService{
         user.setLockOutEndTime(null);
         userRepository.save(user);
 
+        // --- NOVO: Izvlacenje svih rola u listu ---
+        List<String> roles = user.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .toList(); // Sakupljamo sve role (npr. ["ROLE_USER", "ROLE_ADMIN"])
+
         String jwtToken = jwtService.generateToken(user.getUsername());
-        return new AuthResponseDto(jwtToken, user.getUsername());
+        return new AuthResponseDto(jwtToken, user.getUsername(), roles);
     }
 
     @Override

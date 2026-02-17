@@ -1,7 +1,9 @@
 package com.spotify.spotifybackend.config;
 
+import com.spotify.spotifybackend.model.Artist;
 import com.spotify.spotifybackend.model.Authority;
 import com.spotify.spotifybackend.model.User;
+import com.spotify.spotifybackend.repository.ArtistRepository;
 import com.spotify.spotifybackend.repository.AuthorityRepository;
 import com.spotify.spotifybackend.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -17,11 +19,14 @@ public class DataInitializer implements CommandLineRunner {
     private final AuthorityRepository authorityRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ArtistRepository artistRepository;
 
-    public DataInitializer(AuthorityRepository authorityRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DataInitializer(AuthorityRepository authorityRepository, UserRepository userRepository,
+                           PasswordEncoder passwordEncoder, ArtistRepository artistRepository) {
         this.authorityRepository = authorityRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.artistRepository = artistRepository;
     }
 
     @Override
@@ -50,6 +55,15 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(admin);
             System.out.println("✅ ADMIN KORISNIK KREIRAN: email=admin@spotify.com, pass=Admin123!");
         }
+
+        if (artistRepository.count() == 0) {
+            createArtist("Sergej Ćetković", "Popular pop singer and songwriter known for romantic ballads.");
+            createArtist("Adele", "British soul and pop diva with an incredible voice.");
+            createArtist("Kerber", "Legendary hard rock band from Niš.");
+            createArtist("Massimo Savić", "Musician with a unique vocal and artistic style.");
+
+            System.out.println("✅ Artists successfully added to the database!");
+        }
     }
 
     private Authority createAuthorityIfNotFound(String name) {
@@ -61,5 +75,12 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("✅ KREIRANA ROLA: " + name);
         }
         return authority;
+    }
+
+    private void createArtist(String name, String description) {
+        Artist artist = new Artist();
+        artist.setName(name);
+        artist.setDescription(description);
+        artistRepository.save(artist);
     }
 }

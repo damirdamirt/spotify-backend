@@ -53,4 +53,18 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+    // Dodaj ovo u GlobalExceptionHandler.java ako vec nemas
+
+    // Hvata greske validacije za @ModelAttribute (Multipart forme)
+    @org.springframework.web.bind.annotation.ExceptionHandler(org.springframework.validation.BindException.class)
+    public ResponseEntity<java.util.Map<String, String>> handleBindException(org.springframework.validation.BindException ex) {
+        java.util.Map<String, String> errors = new java.util.HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((org.springframework.validation.FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return ResponseEntity.badRequest().body(errors);
+    }
 }

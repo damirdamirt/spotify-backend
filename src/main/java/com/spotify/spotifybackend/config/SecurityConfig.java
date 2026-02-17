@@ -2,6 +2,7 @@ package com.spotify.spotifybackend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -38,6 +39,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/error").permitAll() // Pustamo sve ka /api/auth (Login, Register)
                         .requestMatchers("/api/files/**").hasRole("ADMIN")
+                        // 3. ALBUM CONTROLLER - SPECIFICNA PRAVILA
+                        // GET metode (pregled albuma/umetnika) - Dostupno svima ulogovanima
+                        .requestMatchers(HttpMethod.GET, "/api/albums/**", "/api/artists/**").authenticated()
+                        // POST/PUT/DELETE (kreiranje) - SAMO ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/albums/**").hasRole("ADMIN")
                         .anyRequest().authenticated() // Sve ostalo mora biti logovan korisnik
                 )
                 .sessionManagement(sess ->
