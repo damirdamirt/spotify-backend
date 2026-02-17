@@ -41,9 +41,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/files/**").hasRole("ADMIN")
                         // 3. ALBUM CONTROLLER - SPECIFICNA PRAVILA
                         // GET metode (pregled albuma/umetnika) - Dostupno svima ulogovanima
-                        .requestMatchers(HttpMethod.GET, "/api/albums/**", "/api/artists/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/albums/**", "/api/artists/**", "/api/songs/**").authenticated()
                         // POST/PUT/DELETE (kreiranje) - SAMO ADMIN
                         .requestMatchers(HttpMethod.POST, "/api/albums/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/songs/**").hasRole("ADMIN")
                         .anyRequest().authenticated() // Sve ostalo mora biti logovan korisnik
                 )
                 .sessionManagement(sess ->
